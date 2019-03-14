@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
 const connection = require('../connection');
 const Schema = mongoose.Schema;
 
+/* Chat Schema */
 const chatSchema = new Schema({
     userOne: {
         type: String

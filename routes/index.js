@@ -2,7 +2,7 @@ var express = require('express');
 var router = express.Router();
 const User = require('../db/models/Users');
 
-/* GET home page. */
+//Adds new user to "users" collection
 router.post('/adduser', function(req, res, next) {
   User.findOne({username: req.query.username})
   .then(currentUser => {
@@ -19,10 +19,10 @@ router.post('/adduser', function(req, res, next) {
   })
 });
 
+//Get all users
 router.get('/getusers', (req,res) => {
   User.find({})
   .then(response => {
-    //console.log(response);
     res.send({ users: response });
   })
 })

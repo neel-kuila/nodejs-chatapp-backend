@@ -1,9 +1,10 @@
 const express = require('express');
 const router = express.Router();
 const Chat = require('../db/models/Chats');
+const User = require('../db/models/Users');
 
+//Add new chats to "chats" collection
 router.post('/addchat', (req,res) => {
-    //console.log('add chat route');
     let from = req.query.from;
     let to = req.query.to;
     Chat.findOne({
@@ -45,6 +46,7 @@ router.post('/addchat', (req,res) => {
     })
 })
 
+//Get chats
 router.get('/getchats', (req,res) => {
     console.log(req.query)
     let from = req.query.from;
@@ -66,6 +68,13 @@ router.get('/getchats', (req,res) => {
     else {
         res.send({ chats: [] });
     }
+})
+
+//Get user photo
+router.get('/getPhoto', (req,res) => {
+    User.findOne({ username: req.query.username.replace(/-/g,' ') }).then(result => {
+        res.send({ url: result.photo });
+    })
 })
 
 module.exports = router;
