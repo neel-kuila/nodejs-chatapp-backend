@@ -77,4 +77,18 @@ router.get('/getPhoto', (req,res) => {
     })
 })
 
+//Get chats with all users
+router.get('/getAllUsersChats', (req,res) => {
+    Chat.find({
+        $or: [
+            { userOne: req.body.user },
+            { userTwo: req.body.user }
+        ]
+    }).then(result => {
+        res.json({allUsersChat: result });
+    }).catch(err => {
+        console.log('error',err);
+    })
+})
+
 module.exports = router;
