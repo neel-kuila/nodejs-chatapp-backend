@@ -79,10 +79,11 @@ router.get('/getPhoto', (req,res) => {
 
 //Get chats with all users
 router.get('/getAllUsersChats', (req,res) => {
+    let user = req.query.user.replace(/-/g,' ');
     Chat.find({
         $or: [
-            { userOne: req.body.user },
-            { userTwo: req.body.user }
+            { userOne: user },
+            { userTwo: user }
         ]
     }).then(result => {
         res.json({allUsersChat: result });
