@@ -2,13 +2,30 @@ var express = require('express');
 var router = express.Router();
 const User = require('../db/models/Users');
 
+const deleteTokenAuth = (req,res,next) => {
+  console.log(req.body);
+  if(req.body.token) {
+    User.findOne({ username: req.body.username, token: req.body.token })
+    .then(doc => {
+      doc?next():res.send('not authorised');
+    })
+  } 
+  else {
+    res.send('not authorised');
+  }
+}
+
 //Adds new user to "users" collection
-router.post('/adduser', function(req, res, next) {
+router.post('/adduser', function(req, res) {
   User.findOne({username: req.query.username})
   .then(currentUser => {
     if(currentUser) {
-      console.log('current user');
-      res.json({response:'already a user'});
+      User.updateOne({ username: req.query.username }, { $set: { token: req.query.token }})
+      .then(response => {
+        console.log(response);
+        console.log('current user');
+        res.json({response:'already a user'});
+      })
     }
     else {
       new User(req.query).save().then(newUser => {
@@ -26,5 +43,12 @@ router.get('/getusers', (req,res) => {
     res.send({ users: response });
   })
 })
+
+router.post('/deleteToken', deleteTokenAuth,(req,res) => {
+  User.updateOne({ username: req.body.username }, { $unset: { token: "" }})
+  .then(response => {
+    res.send('token deleted');
+  })
+});
 
 module.exports = router;

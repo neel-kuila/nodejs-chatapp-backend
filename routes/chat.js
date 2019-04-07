@@ -3,8 +3,41 @@ const router = express.Router();
 const Chat = require('../db/models/Chats');
 const User = require('../db/models/Users');
 
+const oneToOneChatAuthCheck = (req,res,next) => {
+    if(req.query.token) {
+        User.findOne({
+            $or: [
+                { $and: [{username: req.query.from}, {token: req.query.token}] },
+                { $and: [{username: req.query.to}, {token: req.query.token}] }
+            ]
+        }).then(doc => {
+            if(doc) {
+                next();
+            }
+            else {
+                res.send('not authorised');
+            }
+        })
+    }
+    else {
+        res.send('not authorised');
+    }
+}
+
+const allUsersAuthCheck = (req,res,next) => {
+    if(req.query.token) {
+        User.findOne({ username: req.query.user, token:req.query.token })
+        .then(doc => {
+            doc?next():res.send('not authorised')
+        })
+    }
+    else {
+        res.send('not authorised');
+    }
+}
+
 //Add new chats to "chats" collection
-router.post('/addchat', (req,res) => {
+router.post('/addchat', oneToOneChatAuthCheck, (req,res) => {
     let from = req.query.from;
     let to = req.query.to;
     Chat.findOne({
@@ -14,7 +47,7 @@ router.post('/addchat', (req,res) => {
         ]
     })
     .then(docs => {
-        console.log(docs);
+        //console.log(docs);
         if(!docs) {
             new Chat({ 
                 userOne: from,
@@ -30,7 +63,7 @@ router.post('/addchat', (req,res) => {
             })
         }
         else {
-            Chat.update({
+            Chat.updateOne({
                 $or: [
                     { $and: [{userOne: from}, {userTwo: to}] }, 
                     { $and: [{userOne: to, userTwo: from}] }
@@ -39,7 +72,7 @@ router.post('/addchat', (req,res) => {
             { $push: { chat: req.query }}
             )
             .then(chat => {
-                console.log('chat added',chat);
+                //console.log('chat added',chat);
                 res.send('new chat');
             })
         }
@@ -47,7 +80,7 @@ router.post('/addchat', (req,res) => {
 })
 
 //Get chats
-router.get('/getchats', (req,res) => {
+router.get('/getchats', oneToOneChatAuthCheck, (req,res) => {
     console.log(req.query)
     let from = req.query.from;
     let to = req.query.to;
@@ -78,7 +111,7 @@ router.get('/getPhoto', (req,res) => {
 })
 
 //Get chats with all users
-router.get('/getAllUsersChats', (req,res) => {
+router.get('/getAllUsersChats', allUsersAuthCheck, (req,res) => {
     let user = req.query.user.replace(/-/g,' ');
     Chat.find({
         $or: [
