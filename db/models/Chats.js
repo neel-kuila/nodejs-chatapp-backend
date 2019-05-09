@@ -14,7 +14,8 @@ const chatSchema = new Schema({
         {
             from: String,
             to: String,
-            message: String
+            message: String,
+            date: Date
         }
     ]
 });

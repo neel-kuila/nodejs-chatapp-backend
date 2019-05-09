@@ -55,7 +55,8 @@ router.post('/addchat', oneToOneChatAuthCheck, (req,res) => {
                 chat: [{
                     from: from,
                     to: to,
-                    message: req.query.message
+                    message: req.query.message,
+                    date: new Date()
                 }]
             }).save().then(newUserChat=> {
                 console.log('new user chat', newUserChat);
@@ -69,7 +70,16 @@ router.post('/addchat', oneToOneChatAuthCheck, (req,res) => {
                     { $and: [{userOne: to, userTwo: from}] }
                 ]
             },
-            { $push: { chat: req.query }}
+            {
+                $push: {
+                    chat: {
+                        from: req.query.from,
+                        to: req.query.to,
+                        message: req.query.message,
+                        date: new Date()
+                    }
+                }
+            }
             )
             .then(chat => {
                 //console.log('chat added',chat);

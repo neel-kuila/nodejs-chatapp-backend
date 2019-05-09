@@ -40,7 +40,6 @@ router.post('/adduser', function(req, res) {
 router.get('/getusers', (req,res) => {
   User.find({}, { username: 1, photo: 1}).collation({ locale: 'en'}).sort({ username: 1 })
   .then(response => {
-    console.log(response)
     res.send({ users: response });
   })
 })
