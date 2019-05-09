@@ -47,7 +47,7 @@ router.post('/addchat', oneToOneChatAuthCheck, (req,res) => {
         ]
     })
     .then(docs => {
-        //console.log(docs);
+        req.query.date=new Date();
         if(!docs) {
             new Chat({ 
                 userOne: from,
@@ -56,11 +56,11 @@ router.post('/addchat', oneToOneChatAuthCheck, (req,res) => {
                     from: from,
                     to: to,
                     message: req.query.message,
-                    date: new Date()
+                    date: req.query.date
                 }]
             }).save().then(newUserChat=> {
                 console.log('new user chat', newUserChat);
-                res.send('new user chat');
+                res.send({message: 'message received', date: req.query.date} );
             })
         }
         else {
@@ -72,20 +72,17 @@ router.post('/addchat', oneToOneChatAuthCheck, (req,res) => {
             },
             {
                 $push: {
-                    chat: {
-                        from: req.query.from,
-                        to: req.query.to,
-                        message: req.query.message,
-                        date: new Date()
-                    }
+                    chat: req.query
                 }
             }
             )
             .then(chat => {
                 //console.log('chat added',chat);
-                res.send('new chat');
+                res.send({message: 'message received', date: req.query.date} );
             })
         }
+    }).catch(err => {
+        console.log(err);
     })
 })
 
