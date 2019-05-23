@@ -5,7 +5,7 @@ const User = require('../db/models/Users');
 const deleteTokenAuth = (req,res,next) => {
   console.log(req.body);
   if(req.body.token) {
-    User.findOne({ username: req.body.username, token: req.body.token })
+    User.findOne({ username: req.body.username, token: [req.body.token] })
     .then(doc => {
       doc?next():res.send('not authorised');
     })
@@ -20,7 +20,9 @@ router.post('/adduser', function(req, res) {
   User.findOne({username: req.query.username})
   .then(currentUser => {
     if(currentUser) {
-      User.updateOne({ username: req.query.username }, { $set: { token: req.query.token }})
+      User.updateOne({ username: req.query.username }, { 
+        $push: { token: req.query.token } 
+      })
       .then(response => {
         console.log(response);
         console.log('current user');
@@ -28,7 +30,12 @@ router.post('/adduser', function(req, res) {
       })
     }
     else {
-      new User(req.query).save().then(newUser => {
+      let user = {
+        username: req.query.username,
+        photo: req.query.photo,
+        token: [req.query.token]
+      }
+      new User(user).save().then(newUser => {
         console.log('new user',newUser);
         res.json({response:'new user added'});
       });
@@ -45,7 +52,7 @@ router.get('/getusers', (req,res) => {
 })
 
 router.post('/deleteToken', deleteTokenAuth,(req,res) => {
-  User.updateOne({ username: req.body.username }, { $unset: { token: "" }})
+  User.updateOne({ username: req.body.username }, { $pull: { token: req.body.token }})
   .then(response => {
     res.send('token deleted');
   })
