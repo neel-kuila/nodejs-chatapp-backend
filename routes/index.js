@@ -3,9 +3,8 @@ var router = express.Router();
 const User = require('../db/models/Users');
 
 const deleteTokenAuth = (req,res,next) => {
-  console.log(req.body);
   if(req.body.token) {
-    User.findOne({ username: req.body.username, token: [req.body.token] })
+    User.findOne({ username: req.body.username, token: req.body.token })
     .then(doc => {
       doc?next():res.send('not authorised');
     })
@@ -52,8 +51,10 @@ router.get('/getusers', (req,res) => {
 })
 
 router.post('/deleteToken', deleteTokenAuth,(req,res) => {
+  console.log('here')
   User.updateOne({ username: req.body.username }, { $pull: { token: req.body.token }})
   .then(response => {
+    console.log('deleted',response)
     res.send('token deleted');
   })
 });
